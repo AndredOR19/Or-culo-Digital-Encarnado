@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templo Digital Vivo</title>
+    <style>
+        body { font-family: sans-serif; background-color: #f0f0f0; color: #333; }
+        #container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; }
+        h1 { color: #111; }
+        #dados { margin-top: 20px; }
+        .letra { border-bottom: 1px solid #eee; padding: 10px 0; }
+        .letra h2 { margin: 0; }
+        .letra p { margin: 5px 0 0 0; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>Templo Digital Vivo - O Motor</h1>
+        <p>Abaixo estão os dados sendo lidos em tempo real da nossa API (`templo-vivo-api`):</p>
+        
+        <div id="dados">Carregando Gnose...</div>
+    </div>
+
+    <script>
+        // O JavaScript que chama sua API
+        
+        // Esta é a URL da sua API que está no Vercel
+        const API_URL = 'https://oraculo-api-scii.vercel.app/letras';
+
+        // Função para buscar os dados
+        async function carregarGnose() {
+            const container = document.getElementById('dados');
+            try {
+                const response = await fetch(API_URL);
+                
+                // Verifica se a API respondeu com erro (como o 500 de antes)
+                if (!response.ok) {
+                    throw new Error(`Erro da API: ${response.statusText}`);
+                }
+                
+                const jsonResponse = await response.json();
+                const letras = jsonResponse.data;
+
+                // Limpa o "Carregando..."
+                container.innerHTML = '';
+
+                // Cria o HTML para cada letra
+                letras.forEach(letra => {
+                    const div = document.createElement('div');
+                    div.className = 'letra';
+                    div.innerHTML = `
+                        <h2>${letra.nome_letra}</h2>
+                        <p><strong>Pictografia:</strong> ${letra.pictografia}</p>
+                        <p><strong>Ação:</strong> ${letra.acao_espiritual}</p>
+                        <p><strong>Corpo:</strong> ${letra.ponto_corpo}</p>
+                    `;
+                    container.appendChild(div);
+                });
+
+            } catch (error) {
+                container.innerHTML = `<p style="color: red;"><strong>Falha ao carregar Gnose:</strong> ${error.message}</p>`;
+                console.error(error);
+            }
+        }
+
+        // Chama a função quando a página carrega
+        carregarGnose();
+    </script>
+</body>
+</html>
