@@ -5,11 +5,62 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oráculo Digital Encarnado</title>
     <style>
-        body { font-family: sans-serif; background-color: #111; color: #eee; }
-        #container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #222; border-radius: 8px; }
-        h1 { color: #fff; }
-        #diagnostico { margin-top: 20px; background-color: #333; padding: 15px; border-radius: 4px; }
-        pre { white-space: pre-wrap; word-wrap: break-word; font-family: monospace; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: #121212; 
+            color: #EAEAEA; 
+            line-height: 1.6;
+        }
+        #container { 
+            max-width: 800px; 
+            margin: 40px auto; 
+            padding: 20px 40px; 
+            background-color: #1E1E1E; 
+            border: 1px solid #333;
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        h1 { 
+            color: #FFFFFF; 
+            border-bottom: 2px solid #4A90E2; 
+            padding-bottom: 10px;
+            font-weight: 300;
+        }
+        h2 {
+            color: #4A90E2;
+            font-weight: 500;
+            margin-top: 30px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        #diagnostico { 
+            margin-top: 20px; 
+            background-color: #252525; 
+            padding: 20px; 
+            border-radius: 4px; 
+        }
+        pre { 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+            background-color: #111;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+        .item-gnose {
+            margin-bottom: 15px;
+            padding-left: 10px;
+            border-left: 3px solid #4A90E2;
+        }
+        .item-gnose p {
+            margin: 5px 0;
+        }
+        .item-gnose strong {
+            color: #A5C9FF;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -23,12 +74,7 @@
     </div>
 
     <script>
-        // O JavaScript que chama sua API
-        
-        // 1. A URL do Cérebro
         const API_URL = 'https://oraculo-api-scii.vercel.app/gerar-mapa-alma';
-
-        // 2. Os dados da Invocação (O seu Mapa)
         const dadosInvocacao = {
             "nome": "Andre", 
             "ano": 1979, 
@@ -40,15 +86,12 @@
             "pais": "Brazil"
         };
 
-        // 3. A Função de Invocação (POST)
         async function invocarOraculo() {
             const container = document.getElementById('diagnostico');
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosInvocacao)
                 });
                 
@@ -58,8 +101,58 @@
                 
                 const jsonResponse = await response.json();
                 
-                // Exibe o JSON completo e formatado
-                container.innerHTML = `<pre>${JSON.stringify(jsonResponse, null, 2)}</pre>`;
+                // --- A NOVA MÁGICA (FORMATAÇÃO) ---
+                if (jsonResponse.erro) {
+                    throw new Error(`Erro retornado pelo Oráculo: ${jsonResponse.erro}`);
+                }
+
+                // Limpa o "Invocando..."
+                container.innerHTML = '';
+
+                // Constrói o HTML
+                const { nome, diagnostico_astrologico, diagnostico_scii_gnose } = jsonResponse;
+
+                let html = `<h2>Diagnóstico para: ${nome}</h2>`;
+
+                // Seção Astrologia
+                html += `<h2>Diagnóstico Astrológico</h2>`;
+                html += `<div class="item-gnose">
+                            <p><strong>Sol:</strong> ${diagnostico_astrologico.sol}</p>
+                            <p><strong>Lua:</strong> ${diagnostico_astrologico.lua}</p>
+                            <p><strong>Ascendente:</strong> ${diagnostico_astrologico.ascendente}</p>
+                         </div>`;
+
+                // Seção Gnose SCII
+                html += `<h2>Diagnóstico SCII (A Gnose)</h2>`;
+                
+                // Gnose do Sol
+                if (diagnostico_scii_gnose.sol_letra && !diagnostico_scii_gnose.sol_letra.erro) {
+                    html += `<div class="item-gnose">
+                                <p><strong>Letra do Sol (Consciência):</strong> ${diagnostico_scii_gnose.sol_letra.nome_letra}</p>
+                                <p><strong>Pictografia:</strong> ${diagnostico_scii_gnose.sol_letra.pictografia}</p>
+                                <p><strong>Ação Espiritual:</strong> ${diagnostico_scii_gnose.sol_letra.acao_espiritual}</p>
+                             </div>`;
+                }
+
+                // Gnose da Lua
+                if (diagnostico_scii_gnose.lua_letra && !diagnostico_scii_gnose.lua_letra.erro) {
+                    html += `<div class="item-gnose">
+                                <p><strong>Letra da Lua (Emoção):</strong> ${diagnostico_scii_gnose.lua_letra.nome_letra}</p>
+                                <p><strong>Pictografia:</strong> ${diagnostico_scii_gnose.lua_letra.pictografia}</p>
+                                <p><strong>Ação Espiritual:</strong> ${diagnostico_scii_gnose.lua_letra.acao_espiritual}</p>
+                             </div>`;
+                }
+
+                // Gnose do Ascendente
+                if (diagnostico_scii_gnose.ascendente_letra && !diagnostico_scii_gnose.ascendente_letra.erro) {
+                    html += `<div class="item-gnose">
+                                <p><strong>Letra do Ascendente (Persona):</strong> ${diagnostico_scii_gnose.ascendente_letra.nome_letra}</p>
+                                <p><strong>Pictografia:</strong> ${diagnostico_scii_gnose.ascendente_letra.pictografia}</p>
+                                <p><strong>Ação Espiritual:</strong> ${diagnostico_scii_gnose.ascendente_letra.acao_espiritual}</p>
+                             </div>`;
+                }
+
+                container.innerHTML = html;
 
             } catch (error) {
                 container.innerHTML = `<pre style="color: red;"><strong>Falha ao invocar Oráculo:</strong> ${error.message}</pre>`;
