@@ -5,66 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oráculo Digital Encarnado</title>
     <style>
-        body { font-family: sans-serif; background-color: #f0f0f0; color: #333; }
-        #container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #fff; border-radius: 8px; }
-        h1 { color: #111; }
-        #dados { margin-top: 20px; }
-        .letra { border-bottom: 1px solid #eee; padding: 10px 0; }
-        .letra h2 { margin: 0; }
-        .letra p { margin: 5px 0 0 0; }
+        body { font-family: sans-serif; background-color: #111; color: #eee; }
+        #container { max-width: 800px; margin: 20px auto; padding: 20px; background-color: #222; border-radius: 8px; }
+        h1 { color: #fff; }
+        #diagnostico { margin-top: 20px; background-color: #333; padding: 15px; border-radius: 4px; }
+        pre { white-space: pre-wrap; word-wrap: break-word; font-family: monospace; }
     </style>
 </head>
 <body>
     <div id="container">
         <h1>Oráculo Digital Encarnado</h1>
-        <p>A Gnose do Cérebro Oficial (`oraculo-api-scii`) está fluindo:</p>
+        <p>Invocando o Cérebro Oficial (`oraculo-api-scii`) para gerar o Mapa de Alma...</p>
         
-        <div id="dados">Carregando Gnose...</div>
+        <div id="diagnostico">
+            <pre>Invocando...</pre>
+        </div>
     </div>
 
     <script>
         // O JavaScript que chama sua API
         
-        // --- ESTA É A CORREÇÃO CRÍTICA ---
-        const API_URL = 'https://oraculo-api-scii.vercel.app/letras';
+        // 1. A URL do Cérebro
+        const API_URL = 'https://oraculo-api-scii.vercel.app/gerar-mapa-alma';
 
-        // Função para buscar os dados
-        async function carregarGnose() {
-            const container = document.getElementById('dados');
+        // 2. Os dados da Invocação (O seu Mapa)
+        const dadosInvocacao = {
+            "nome": "Andre", 
+            "ano": 1979, 
+            "mes": 12, 
+            "dia": 31, 
+            "hora": 5, 
+            "minuto": 30, 
+            "cidade": "Vacaria", 
+            "pais": "Brazil"
+        };
+
+        // 3. A Função de Invocação (POST)
+        async function invocarOraculo() {
+            const container = document.getElementById('diagnostico');
             try {
-                const response = await fetch(API_URL);
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(dadosInvocacao)
+                });
                 
                 if (!response.ok) {
                     throw new Error(`Erro da API: ${response.statusText}`);
                 }
                 
                 const jsonResponse = await response.json();
-                const letras = jsonResponse.data;
-
-                // Limpa o "Carregando..."
-                container.innerHTML = '';
-
-                // Cria o HTML para cada letra
-                letras.forEach(letra => {
-                    const div = document.createElement('div');
-                    div.className = 'letra';
-                    div.innerHTML = `
-                        <h2>${letra.nome_letra}</h2>
-                        <p><strong>Pictografia:</strong> ${letra.pictografia}</p>
-                        <p><strong>Ação:</strong> ${letra.acao_espiritual}</p>
-                        <p><strong>Corpo:</strong> ${letra.ponto_corpo}</p>
-                    `;
-                    container.appendChild(div);
-                });
+                
+                // Exibe o JSON completo e formatado
+                container.innerHTML = `<pre>${JSON.stringify(jsonResponse, null, 2)}</pre>`;
 
             } catch (error) {
-                container.innerHTML = `<p style="color: red;"><strong>Falha ao carregar Gnose:</strong> ${error.message}</p>`;
+                container.innerHTML = `<pre style="color: red;"><strong>Falha ao invocar Oráculo:</strong> ${error.message}</pre>`;
                 console.error(error);
             }
         }
 
         // Chama a função quando a página carrega
-        carregarGnose();
+        invocarOraculo();
     </script>
 </body>
 </html>
