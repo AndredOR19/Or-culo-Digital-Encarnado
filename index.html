@@ -36,8 +36,7 @@
         #diagnostico { 
             margin-top: 20px; 
             background-color: #252525; 
-            padding: 20px; 
-            border-radius: 4px; 
+            padding: 20px;             border-radius: 4px; 
         }
         pre { 
             white-space: pre-wrap; 
@@ -61,34 +60,140 @@
             color: #A5C9FF;
             font-weight: 500;
         }
+        /* --- ESTILOS DO NOVO FORMULÁRIO --- */
+        #form-oraculo {
+            background-color: #252525;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .form-grid .full-width {
+            grid-column: 1 / -1;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            color: #AAA;
+        }
+        .form-group input {
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #555;
+            color: #EEE;
+            border-radius: 4px;
+        }
+        #btn-invocar {
+            grid-column: 1 / -1;
+            padding: 12px;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #FFF;
+            background-color: #4A90E2;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #btn-invocar:hover {
+            background-color: #357ABD;
+        }
+        #btn-invocar:disabled {
+            background-color: #555;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>
     <div id="container">
         <h1>Oráculo Digital Encarnado</h1>
-        <p>Invocando o Cérebro Oficial (`oraculo-api-scii`) para gerar o Mapa de Alma...</p>
+        <p>Insira os dados de nascimento para invocar o Cérebro Oficial (`oraculo-api-scii`) e gerar o Mapa de Alma.</p>
         
+        <form id="form-oraculo">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" value="Andre" required>
+                </div>
+                <div class="form-group">
+                    <label for="dia">Dia (1-31):</label>
+                    <input type="number" id="dia" value="31" required>
+                </div>
+                <div class="form-group">
+                    <label for="mes">Mês (1-12):</label>
+                    <input type="number" id="mes" value="12" required>
+                </div>
+                <div class="form-group">
+                    <label for="ano">Ano (ex: 1979):</label>
+                    <input type="number" id="ano" value="1979" required>
+                </div>
+                <div class="form-group">
+                    <label for="hora">Hora (0-23):</label>
+                    <input type="number" id="hora" value="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="minuto">Minuto (0-59):</label>
+                    <input type="number" id="minuto" value="30" required>
+                </div>
+                <div class="form-group">
+                    <label for="cidade">Cidade (ex: Vacaria):</label>
+                    <input type="text" id="cidade" value="Vacaria" required>
+                </div>
+                <div class="form-group">
+                    <label for="pais">País (ex: Brazil):</label>
+                    <input type="text" id="pais" value="Brazil" required>
+                </div>
+                <button type="submit" id="btn-invocar">Invocar Oráculo</button>
+            </div>
+        </form>
+
         <div id="diagnostico">
-            <pre>Invocando...</pre>
+            <pre>Aguardando invocação...</pre>
         </div>
     </div>
 
     <script>
         const API_URL = 'https://oraculo-api-scii.vercel.app/gerar-mapa-alma';
-        const dadosInvocacao = {
-            "nome": "Andre", 
-            "ano": 1979, 
-            "mes": 12, 
-            "dia": 31, 
-            "hora": 5, 
-            "minuto": 30, 
-            "cidade": "Vacaria", 
-            "pais": "Brazil"
-        };
+        
+        // Pega os elementos do formulário
+        const form = document.getElementById('form-oraculo');
+        const container = document.getElementById('diagnostico');
+        const botao = document.getElementById('btn-invocar');
 
+        // Adiciona o "escutador" de evento ao formulário
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o recarregamento da página
+            invocarOraculo();
+        });
+
+        // A Função de Invocação (POST)
         async function invocarOraculo() {
-            const container = document.getElementById('diagnostico');
+            container.innerHTML = '<pre>Invocando...</pre>';
+            botao.disabled = true; // Desativa o botão durante a chamada
+            botao.innerText = 'Calculando...';
+
             try {
+                // 1. Pega os dados do formulário
+                const dadosInvocacao = {
+                    "nome": document.getElementById('nome').value,
+                    "ano": parseInt(document.getElementById('ano').value),
+                    "mes": parseInt(document.getElementById('mes').value),
+                    "dia": parseInt(document.getElementById('dia').value),
+                    "hora": parseInt(document.getElementById('hora').value),
+                    "minuto": parseInt(document.getElementById('minuto').value),
+                    "cidade": document.getElementById('cidade').value,
+                    "pais": document.getElementById('pais').value
+                };
+
+                // 2. Chama a API
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -101,67 +206,63 @@
                 
                 const jsonResponse = await response.json();
                 
-                // --- A NOVA MÁGICA (FORMATAÇÃO) ---
+                // 3. Formata a Gnose (como antes)
                 if (jsonResponse.erro) {
                     throw new Error(`Erro retornado pelo Oráculo: ${jsonResponse.erro}`);
                 }
 
-                // Limpa o "Invocando..."
-                container.innerHTML = '';
-
-                // Constrói o HTML
                 const { nome, diagnostico_astrologico, diagnostico_scii_gnose } = jsonResponse;
-
                 let html = `<h2>Diagnóstico para: ${nome}</h2>`;
 
-                // Seção Astrologia
                 html += `<h2>Diagnóstico Astrológico</h2>`;
                 html += `<div class="item-gnose">
                             <p><strong>Sol:</strong> ${diagnostico_astrologico.sol}</p>
                             <p><strong>Lua:</strong> ${diagnostico_astrologico.lua}</p>
                             <p><strong>Ascendente:</strong> ${diagnostico_astrologico.ascendente}</p>
+                            <p><strong>Mercúrio (Mente):</strong> ${diagnostico_astrologico.mercurio}</p>
+                            <p><strong>Marte (Ação):</strong> ${diagnostico_astrologico.marte}</p>
+                            <p><strong>Vênus (Valores):</strong> ${diagnostico_astrologico.venus}</p>
+                            <p><strong>Júpiter (Expansão):</strong> ${diagnostico_astrologico.jupiter}</p>
+                            <p><strong>Saturno (Estrutura):</strong> ${diagnostico_astrologico.saturno}</p>
+                            <p><strong>Urano (Revolução):</strong> ${diagnostico_astrologico.urano}</p>
+                            <p><strong>Netuno (Dissolução):</strong> ${diagnostico_astrologico.netuno}</p>
+                            <p><strong>Plutão (Transformação):</strong> ${diagnostico_astrologico.plutao}</p>
                          </div>`;
 
-                // Seção Gnose SCII
                 html += `<h2>Diagnóstico SCII (A Gnose)</h2>`;
                 
-                // Gnose do Sol
-                if (diagnostico_scii_gnose.sol_letra && !diagnostico_scii_gnose.sol_letra.erro) {
-                    html += `<div class="item-gnose">
-                                <p><strong>Letra do Sol (Consciência):</strong> ${diagnostico_scii_gnose.sol_letra.nome_letra}</p>
-                                <p><strong>Pictografia:</strong> ${diagnostico_scii_gnose.sol_letra.pictografia}</p>
-                                <p><strong>Ação Espiritual:</strong> ${diagnostico_scii_gnose.sol_letra.acao_espiritual}</p>
-                             </div>`;
+                function exibirGnose(planeta, nome, dados) {
+                    if (dados && !dados.erro) {
+                        return `<div class="item-gnose">
+                                    <p><strong>Letra de ${planeta} (${nome}):</strong> ${dados.nome_letra}</p>
+                                    <p><strong>Pictografia:</strong> ${dados.pictografia}</p>
+                                </div>`;
+                    }
+                    return ''; 
                 }
 
-                // Gnose da Lua
-                if (diagnostico_scii_gnose.lua_letra && !diagnostico_scii_gnose.lua_letra.erro) {
-                    html += `<div class="item-gnose">
-                                <p><strong>Letra da Lua (Emoção):</strong> ${diagnostico_scii_gnose.lua_letra.nome_letra}</p>
-                                <p><strong>Pictografia:</strong> ${diagnostico_scii_gnose.lua_letra.pictografia}</p>
-                                <p><strong>Ação Espiritual:</strong> ${diagnostico_scii_gnose.lua_letra.acao_espiritual}</p>
-                             </div>`;
-                }
-
-                // Gnose do Ascendente
-                if (diagnostico_scii_gnose.ascendente_letra && !diagnostico_scii_gnose.ascendente_letra.erro) {
-                    html += `<div class="item-gnose">
-                                <p><strong>Letra do Ascendente (Persona):</strong> ${diagnostico_scii_gnose.ascendente_letra.nome_letra}</p>
-                                <p><strong>Pictografia:</strong> ${diagnostico_scii_gnose.ascendente_letra.pictografia}</p>
-                                <p><strong>Ação Espiritual:</strong> ${diagnostico_scii_gnose.ascendente_letra.acao_espiritual}</p>
-                             </div>`;
-                }
-
+                html += exibirGnose("Sol", "Consciência", diagnostico_scii_gnose.sol_letra);
+                html += exibirGnose("Lua", "Emoção", diagnostico_scii_gnose.lua_letra);
+                html += exibirGnose("Ascendente", "Persona", diagnostico_scii_gnose.ascendente_letra);
+                html += exibirGnose("Mercúrio", "Mente", diagnostico_scii_gnose.mercurio_letra);
+                html += exibirGnose("Marte", "Ação", diagnostico_scii_gnose.marte_letra);
+                html += exibirGnose("Vênus", "Valores", diagnostico_scii_gnose.venus_letra);
+                html += exibirGnose("Júpiter", "Expansão", diagnostico_scii_gnose.jupiter_letra);
+                html += exibirGnose("Saturno", "Estrutura", diagnostico_scii_gnose.saturno_letra);
+                html += exibirGnose("Urano", "Revolução", diagnostico_scii_gnose.urano_letra);
+                html += exibirGnose("Netuno", "Dissolução", diagnostico_scii_gnose.netuno_letra);
+                html += exibirGnose("Plutão", "Transformação", diagnostico_scii_gnose.plutao_letra);
+                
                 container.innerHTML = html;
 
             } catch (error) {
                 container.innerHTML = `<pre style="color: red;"><strong>Falha ao invocar Oráculo:</strong> ${error.message}</pre>`;
                 console.error(error);
+            } finally {
+                botao.disabled = false; // Reativa o botão
+                botao.innerText = 'Invocar Oráculo';
             }
         }
-
-        // Chama a função quando a página carrega
-        invocarOraculo();
     </script>
 </body>
 </html>
